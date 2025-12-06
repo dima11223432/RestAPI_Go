@@ -2,6 +2,7 @@ package teststore_test
 
 import (
 	"RestApi/internal/app/model"
+	"RestApi/internal/app/store"
 	teststore "RestApi/internal/app/store/testStore"
 	"testing"
 
@@ -20,7 +21,7 @@ func TestUserRepository_FindByEmail(t *testing.T) {
 	email := "user@example.org"
 
 	_, err := s.User().FindByEmail(email)
-	assert.Error(t, err)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
 	u := model.TestUser(t)
 	u.Email = email

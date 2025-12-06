@@ -2,7 +2,7 @@ package teststore
 
 import (
 	"RestApi/internal/app/model"
-	"fmt"
+	"RestApi/internal/app/store"
 )
 
 type UserRepository struct {
@@ -27,7 +27,7 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 	u, ok := r.users[email]
 
 	if !ok {
-		return nil, fmt.Errorf("not found")
+		return nil, store.ErrRecordNotFound
 	}
 
 	return u, nil
