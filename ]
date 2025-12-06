@@ -1,0 +1,10 @@
+package teststore
+
+import (
+	"RestApi/internal/app/model"
+)
+
+type UserRepository struct {
+	store *teststore.Store
+	users map[string]*model.User
+}
