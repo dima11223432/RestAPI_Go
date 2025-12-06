@@ -24,9 +24,7 @@ func main() {
 		panic(err)
 	}
 
-	server := apiserver.NewApiServer(config)
-
-	if err := server.Start(); err != nil {
+	if err := apiserver.Start(config); err != nil {
 		panic(err)
 	}
 }
