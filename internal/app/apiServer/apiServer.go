@@ -8,6 +8,7 @@ import (
 
 func Start(config *Config) error {
 	db, err := newDB(config.DatabaseURL)
+	defer db.Close()
 	if err != nil {
 		return err
 	}
@@ -22,7 +23,6 @@ func newDB(databaseURL string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}

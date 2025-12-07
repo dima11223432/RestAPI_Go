@@ -4,10 +4,15 @@ import (
 	"RestApi/internal/app/model"
 	"RestApi/internal/app/store"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+)
+
+var (
+	errIncorectEmailOrPassword = errors.New("incorrect email or password")
 )
 
 type server struct {
@@ -34,6 +39,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) configureRouter() {
 	s.router.HandleFunc("/users", s.HandleUsersCreate()).Methods("POST")
+	s.router.HandleFunc("/session", s.HandleSessionCreate()).Methods("POST")
 }
 
 func (s *server) HandleUsersCreate() http.HandlerFunc {
@@ -58,14 +64,43 @@ func (s *server) HandleUsersCreate() http.HandlerFunc {
 		s.respond(w, r, http.StatusCreated, u)
 	}
 }
+
+func (s *server) HandleSessionCreate() http.HandlerFunc {
+	type request struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		req := &request{}
+		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
+			return
+		}
+
+		u, err := s.store.User().FindByEmail(req.Email)
+		if err != nil || !u.ComparePassword(req.Password) {
+			s.error(w, r, http.StatusUnauthorized, errIncorectEmailOrPassword)
+			return
+		}
+		s.respond(w, r, http.StatusOK, nil)
+	}
+}
 func (s *server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
 	s.respond(w, r, code, map[string]string{"error": err.Error()})
 }
 
 func (s *server) respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if data == nil {
+		w.WriteHeader(code)
+		return
+	}
+
 	w.WriteHeader(code)
 
-	if data != nil {
-		json.NewEncoder(w).Encode(data)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		s.logger.Errorf("Failed to encode response: %v", err)
 	}
 }
