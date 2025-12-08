@@ -1,9 +1,10 @@
 package apiserver
 
 type Config struct {
-	BinAddr     string `toml:"bind_addr"`
-	LogLevel    string `toml:"log_level"`
-	DatabaseURL string `toml:"database_url"`
+	BinAddr      string `toml:"bind_addr"`
+	LogLevel     string `toml:"log_level"`
+	DatabaseURL  string `toml:"database_url"`
+	SessionStore string `toml:"session_key"`
 }
 
 func NewConfig() *Config {

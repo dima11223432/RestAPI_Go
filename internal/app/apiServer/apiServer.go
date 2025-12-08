@@ -4,6 +4,8 @@ import (
 	sqlstore "RestApi/internal/app/store/sqlStore"
 	"database/sql"
 	"net/http"
+
+	"github.com/gorilla/sessions"
 )
 
 func Start(config *Config) error {
@@ -13,7 +15,8 @@ func Start(config *Config) error {
 		return err
 	}
 	store := sqlstore.NewStore(db)
-	srv := NewServer(store)
+	sessionStore := sessions.NewCookieStore([]byte(config.SessionStore))
+	srv := NewServer(store, sessionStore)
 	return http.ListenAndServe(config.BinAddr, srv)
 }
 
